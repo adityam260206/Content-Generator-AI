@@ -1,10 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest } from 'next/server';
 
-// Initialize the Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-});
+// Initialize the Gemini client
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,36 +12,29 @@ export async function POST(req: NextRequest) {
       return new Response('Prompt is required', { status: 400 });
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return new Response('API key not configured', { status: 500 });
     }
 
     // Build the system prompt based on content type and tone
     const systemPrompt = buildSystemPrompt(contentType, tone);
 
-    // Create a streaming response
-    const stream = await anthropic.messages.stream({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2048,
-      temperature: 0.7,
-      system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    // Combine system prompt with user prompt
+    const fullPrompt = `${systemPrompt}\n\nUser Request: ${prompt}`;
+
+    // Get the generative model
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+
+    // Generate content with streaming
+    const result = await model.generateContentStream(fullPrompt);
 
     // Create a ReadableStream to pipe the response
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of stream) {
-            if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
-              const text = chunk.delta.text;
-              controller.enqueue(new TextEncoder().encode(text));
-            }
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
+            controller.enqueue(new TextEncoder().encode(text));
           }
           controller.close();
         } catch (error) {

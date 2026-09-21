@@ -1,10 +1,10 @@
 # AI Content Generator 🤖
 
-A modern, AI-powered content generation web application built with Next.js and powered by Claude AI. Generate high-quality content for blogs, social media, emails, product descriptions, and more with real-time streaming responses.
+A modern, AI-powered content generation web application built with Next.js and powered by Google Gemini AI. Generate high-quality content for blogs, social media, emails, product descriptions, and more with real-time streaming responses.
 
 ![AI Content Generator](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
-![Claude AI](https://img.shields.io/badge/Claude-AI-purple?style=flat-square)
+![Gemini AI](https://img.shields.io/badge/Gemini-AI-blue?style=flat-square&logo=google)
 
 ## ✨ Features
 
@@ -26,7 +26,7 @@ A modern, AI-powered content generation web application built with Next.js and p
 ### Prerequisites
 
 - Node.js 18+ installed
-- An Anthropic API key (get one at [console.anthropic.com](https://console.anthropic.com/))
+- A Google Gemini API key (get one at [Google AI Studio](https://makersuite.google.com/app/apikey))
 
 ### Installation
 
@@ -46,9 +46,9 @@ npm install
 cp .env.example .env.local
 ```
 
-4. Add your Anthropic API key to `.env.local`:
+4. Add your Gemini API key to `.env.local`:
 ```
-ANTHROPIC_API_KEY=your_actual_api_key_here
+GEMINI_API_KEY=your_actual_api_key_here
 ```
 
 5. Run the development server:
@@ -63,7 +63,7 @@ npm run dev
 - **Framework**: Next.js 16 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4
-- **AI Model**: Claude Sonnet 4 (Anthropic)
+- **AI Model**: Google Gemini Pro
 - **Deployment**: Vercel (recommended)
 
 ## 📖 Usage
@@ -86,7 +86,7 @@ The app features a beautiful gradient design with real-time content generation:
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `ANTHROPIC_API_KEY` | Your Anthropic API key for Claude AI | Yes |
+| `GEMINI_API_KEY` | Your Google Gemini API key | Yes |
 
 ## 🚢 Deployment
 
@@ -97,7 +97,7 @@ The easiest way to deploy this app is using Vercel:
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/adityam260206/content-generator-AI)
 
 1. Click the button above
-2. Add your `ANTHROPIC_API_KEY` environment variable
+2. Add your `GEMINI_API_KEY` environment variable
 3. Deploy!
 
 ### Manual Deployment
@@ -146,7 +146,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 🙏 Acknowledgments
 
 - Built with [Next.js](https://nextjs.org/)
-- Powered by [Claude AI](https://www.anthropic.com/)
+- Powered by [Google Gemini AI](https://ai.google.dev/)
 - Styled with [Tailwind CSS](https://tailwindcss.com/)
 
 ---

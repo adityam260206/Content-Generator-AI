@@ -65,7 +65,7 @@ export default function Home() {
             AI Content Generator
           </h1>
           <p className="text-xl text-purple-200">
-            Generate high-quality content powered by Claude AI
+            Generate high-quality content powered by Google Gemini AI
           </p>
         </div>
 
@@ -205,7 +205,7 @@ export default function Home() {
             <div className="text-3xl mb-3">⚡</div>
             <h3 className="text-white font-semibold mb-2">Lightning Fast</h3>
             <p className="text-purple-200 text-sm">
-              Real-time streaming responses powered by Claude AI
+              Real-time streaming responses powered by Google Gemini AI
             </p>
           </div>
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">

@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Content Generator | Powered by Claude AI",
-  description: "Generate high-quality content for blogs, social media, emails, and more with AI. Powered by Claude AI with real-time streaming responses.",
-  keywords: ["AI", "content generator", "Claude AI", "blog posts", "social media", "content creation"],
+  title: "AI Content Generator | Powered by Google Gemini",
+  description: "Generate high-quality content for blogs, social media, emails, and more with AI. Powered by Google Gemini with real-time streaming responses.",
+  keywords: ["AI", "content generator", "Gemini AI", "blog posts", "social media", "content creation"],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
