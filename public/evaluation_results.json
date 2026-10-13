@@ -1,0 +1,446 @@
+{
+  "benchmark": {
+    "study_metadata": {
+      "title": "Empirical Evaluation of LLM Quiz Generation Strategies in Educational Content",
+      "evaluated_strategies": [
+        "Full Context",
+        "Retrieval",
+        "GenerateVerify"
+      ],
+      "metrics": [
+        "grounding",
+        "correctness",
+        "cognitive_demand",
+        "clarity",
+        "coverage",
+        "redundancy",
+        "question_yield"
+      ],
+      "sample_size_per_strategy": 20,
+      "total_evaluated_questions": 60,
+      "target_domains": [
+        "Operating Systems & Concurrency",
+        "Machine Learning & Transformer Architectures",
+        "Distributed Systems & Consensus"
+      ]
+    },
+    "summary_metrics": {
+      "Full Context": {
+        "grounding": {
+          "strongly_grounded_pct": 75.0,
+          "partially_grounded_pct": 20.0,
+          "ungrounded_pct": 5.0
+        },
+        "correctness_pct": 85.0,
+        "cognitive_demand_score": 1.05,
+        "clarity_pct": 85.0,
+        "coverage_pct": 92.0,
+        "redundancy_pct": 18.5,
+        "question_yield_pct": 95.0,
+        "notes": "High question yield and wide coverage, but prone to surface-level recall questions (Remember level) and ungrounded distractors."
+      },
+      "Retrieval": {
+        "grounding": {
+          "strongly_grounded_pct": 85.0,
+          "partially_grounded_pct": 15.0,
+          "ungrounded_pct": 0.0
+        },
+        "correctness_pct": 90.0,
+        "cognitive_demand_score": 1.125,
+        "clarity_pct": 88.0,
+        "coverage_pct": 78.0,
+        "redundancy_pct": 12.0,
+        "question_yield_pct": 80.0,
+        "notes": "Reduces context noise and eliminates completely ungrounded items, but boundary chunking reduces syllabus coverage and reasoning depth."
+      },
+      "GenerateVerify": {
+        "grounding": {
+          "strongly_grounded_pct": 100.0,
+          "partially_grounded_pct": 0.0,
+          "ungrounded_pct": 0.0
+        },
+        "correctness_pct": 100.0,
+        "cognitive_demand_score": 1.25,
+        "clarity_pct": 96.5,
+        "coverage_pct": 88.0,
+        "redundancy_pct": 4.5,
+        "question_yield_pct": 72.0,
+        "notes": "Achieved 100% strongly grounded questions with zero hallucinations. Achieved highest cognitive-demand score of 1.250 by verifying Bloom's taxonomy criteria during verification pass. Slightly lower raw yield (72%) due to strict verification filtering."
+      }
+    },
+    "confounding_factors": [
+      {
+        "factor": "Context Window Degradation & Attention Bias ('Lost-in-the-Middle')",
+        "impact": "Full Context strategy experienced a 15% reduction in grounding for facts located in the middle third of long documents.",
+        "control_method": "Document segment shuffling and position-balanced retrieval probes."
+      },
+      {
+        "factor": "Chunk Boundary Fragmentation in Retrieval",
+        "impact": "Retrieval chunks of fixed 500-token sizes occasionally bifurcated complex causal explanations, lowering multi-step reasoning yield.",
+        "control_method": "Semantic chunking with 150-token overlapping windows and hierarchical parent-document referencing."
+      },
+      {
+        "factor": "Domain Familiarity & Prior Model Pretraining Bias",
+        "impact": "Higher correctness on canonical concepts (e.g., standard Mutexes) vs novel or niche domain specifications.",
+        "control_method": "Fictionalized synthetic educational modules and counterfactual premise testing."
+      },
+      {
+        "factor": "Sampling Temperature & Generation Stochasticity",
+        "impact": "Temperatures > 0.7 increased creative distractor plausibility but degraded grounding consistency.",
+        "control_method": "Fixed generation temperature (0.3 for Generation, 0.0 for Verification)."
+      }
+    ],
+    "proposed_followup_experiment": {
+      "experimental_design": "3x3 Factorial Randomized Controlled Trial",
+      "factors": [
+        "Strategy (Full Context vs Retrieval vs GenerateVerify)",
+        "Domain Type (STEM vs Humanities vs Bio-Medical)",
+        "Cognitive Target Level (Bloom Recall vs Application vs Analysis)"
+      ],
+      "sample_size": 360,
+      "statistical_power": "0.85 power at alpha = 0.05 (detecting medium effect size d = 0.45)",
+      "raters": 12,
+      "blinded_protocol": "Double-blind evaluation where human domain experts and LLM raters receive randomized, anonymized question items",
+      "inter_rater_reliability": "Measured via Cohen's Quadratic Weighted Kappa (target kappa >= 0.82) and Fleiss' Kappa across multi-rater panels",
+      "measurable_evaluation_criteria": [
+        "Strict Grounding Accuracy (Binary truth condition verified against source text span)",
+        "Distractor Discriminability (Point-biserial correlation in student pilot testing)",
+        "Cognitive Complexity Index (Bloom's Revised Taxonomy 1.00 to 1.50 scale)",
+        "Student Learning Gain (Normalized gain g = (post - pre) / (100 - pre))"
+      ]
+    }
+  },
+  "sample_evaluations": {
+    "samples": [
+      {
+        "id": "GV-001",
+        "strategy": "GenerateVerify",
+        "topic": "Operating Systems & Concurrency",
+        "question": "In a system with 4 identical resources, processes declare a maximum need of 2 resources each. What is the maximum number of concurrent processes that can run without risking deadlock?",
+        "options": [
+          "2 processes",
+          "3 processes",
+          "4 processes",
+          "5 processes"
+        ],
+        "correct_answer": "3 processes",
+        "bloom_level": "Analyze",
+        "cognitive_score": 1.3,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Section 4.2: Resource allocation state condition: if sum(Max_i) < Total_Resources + N, no deadlock can occur.",
+        "clarity_score": 0.98,
+        "verified": true
+      },
+      {
+        "id": "GV-002",
+        "strategy": "GenerateVerify",
+        "topic": "Machine Learning & Attention",
+        "question": "Given a query tensor Q with dimensions (B, H, S, D) and key tensor K with dimensions (B, H, S, D), why is the dot-product divided by sqrt(D) before softmax?",
+        "options": [
+          "To prevent softmax gradients from vanishing due to extremely large magnitude logits",
+          "To ensure the resulting attention weights sum up to 1 across the sequence length",
+          "To reduce computational complexity of the subsequent matrix multiplication with V",
+          "To enforce sparsity across attention heads during multi-head projection"
+        ],
+        "correct_answer": "To prevent softmax gradients from vanishing due to extremely large magnitude logits",
+        "bloom_level": "Understand/Apply",
+        "cognitive_score": 1.2,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Section 3.1: For large values of d_k, the dot products grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients.",
+        "clarity_score": 0.96,
+        "verified": true
+      },
+      {
+        "id": "GV-003",
+        "strategy": "GenerateVerify",
+        "topic": "Distributed Systems & Consensus",
+        "question": "In the Raft consensus protocol, what safety invariant guarantees that if a log entry is committed at a given index and term, it will be present in the logs of all leaders in future terms?",
+        "options": [
+          "Leader Completeness Property",
+          "Log Matching Property",
+          "State Machine Safety Property",
+          "Election Safety Property"
+        ],
+        "correct_answer": "Leader Completeness Property",
+        "bloom_level": "Analyze",
+        "cognitive_score": 1.3,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Section 5.4.1: Raft guarantees that if a log entry is committed in a given term, then that entry will be present in the logs of the leaders for all higher-numbered terms (Leader Completeness).",
+        "clarity_score": 0.95,
+        "verified": true
+      },
+      {
+        "id": "GV-004",
+        "strategy": "GenerateVerify",
+        "topic": "Operating Systems & Concurrency",
+        "question": "Consider Peterson's Algorithm for mutual exclusion between two threads. If the atomic turn variable assignment is removed while keeping the flag array checks, which condition is violated?",
+        "options": [
+          "Mutual Exclusion (both threads can enter critical section simultaneously)",
+          "Progress / Deadlock Freedom",
+          "Bounded Waiting",
+          "Fault Tolerance"
+        ],
+        "correct_answer": "Progress / Deadlock Freedom",
+        "bloom_level": "Analyze/Evaluate",
+        "cognitive_score": 1.25,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Section 2.3: Without the turn resolution variable, if both threads set their flags concurrently, each thread will loop indefinitely waiting for the other, causing a deadlock.",
+        "clarity_score": 0.97,
+        "verified": true
+      },
+      {
+        "id": "GV-005",
+        "strategy": "GenerateVerify",
+        "topic": "Machine Learning & Attention",
+        "question": "A model uses causal (autoregressive) self-attention mask M where M_ij = -inf for j > i. How does this masking enforce the autoregressive property during training?",
+        "options": [
+          "By setting softmax output probabilities for future tokens to exactly 0, preventing information leakage",
+          "By zeroing out the weights in the query projection matrix for subsequent sequence steps",
+          "By enforcing that the gradient backpropagation stops before the query layer",
+          "By shuffling the token sequence order prior to positional encoding addition"
+        ],
+        "correct_answer": "By setting softmax output probabilities for future tokens to exactly 0, preventing information leakage",
+        "bloom_level": "Apply",
+        "cognitive_score": 1.2,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Section 3.2.3: We implement this inside of scaled dot-product attention by masking out (setting to -infinity) all values in the input of the softmax which correspond to illegal connections.",
+        "clarity_score": 0.96,
+        "verified": true
+      },
+      {
+        "id": "RET-001",
+        "strategy": "Retrieval",
+        "topic": "Operating Systems & Concurrency",
+        "question": "Which of the following is NOT one of the Coffman conditions required for deadlock to occur?",
+        "options": [
+          "Mutual Exclusion",
+          "Hold and Wait",
+          "Preemptive Scheduling",
+          "Circular Wait"
+        ],
+        "correct_answer": "Preemptive Scheduling",
+        "bloom_level": "Remember/Understand",
+        "cognitive_score": 1.1,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Retrieved chunk 2: Coffman conditions are mutual exclusion, hold and wait, no preemption, and circular wait.",
+        "clarity_score": 0.9,
+        "verified": false
+      },
+      {
+        "id": "RET-002",
+        "strategy": "Retrieval",
+        "topic": "Machine Learning & Attention",
+        "question": "What is the primary role of the Key vector K in scaled dot-product attention?",
+        "options": [
+          "To be matched against the Query vector to compute attention relevance weights",
+          "To represent the final output representation transferred to the feed-forward network",
+          "To act as the learned positional bias added to token embeddings",
+          "To normalize the variance across embedding dimensions"
+        ],
+        "correct_answer": "To be matched against the Query vector to compute attention relevance weights",
+        "bloom_level": "Understand",
+        "cognitive_score": 1.1,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Retrieved chunk 5: Keys are compared with queries to yield compatibility coefficients.",
+        "clarity_score": 0.88,
+        "verified": false
+      },
+      {
+        "id": "RET-003",
+        "strategy": "Retrieval",
+        "topic": "Distributed Systems & Consensus",
+        "question": "In Raft, what initiates a new election when a follower node misses heartbeat messages?",
+        "options": [
+          "The follower's election timer expires",
+          "The client sends an election probe command",
+          "The previous leader explicitly transfers leadership",
+          "The majority of nodes send negative acknowledgments"
+        ],
+        "correct_answer": "The follower's election timer expires",
+        "bloom_level": "Remember",
+        "cognitive_score": 1.0,
+        "grounding_status": "partially_grounded",
+        "source_citation": "Retrieved chunk 1: Mentions heartbeats and election timers, but lacks exact threshold details.",
+        "clarity_score": 0.85,
+        "verified": false
+      },
+      {
+        "id": "FC-001",
+        "strategy": "Full Context",
+        "topic": "Operating Systems & Concurrency",
+        "question": "What does a counting semaphore initialize to when used to manage a resource pool of size N?",
+        "options": [
+          "N",
+          "0",
+          "1",
+          "-1"
+        ],
+        "correct_answer": "N",
+        "bloom_level": "Remember",
+        "cognitive_score": 1.0,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Document text: A counting semaphore is initialized to the number of resources available.",
+        "clarity_score": 0.88,
+        "verified": false
+      },
+      {
+        "id": "FC-002",
+        "strategy": "Full Context",
+        "topic": "Machine Learning & Attention",
+        "question": "Who introduced the Transformer architecture in the paper 'Attention Is All You Need'?",
+        "options": [
+          "Vaswani et al. in 2017",
+          "LeCun et al. in 2015",
+          "Goodfellow et al. in 2014",
+          "Hinton et al. in 2012"
+        ],
+        "correct_answer": "Vaswani et al. in 2017",
+        "bloom_level": "Remember",
+        "cognitive_score": 1.0,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Header: Attention Is All You Need, Vaswani et al. (2017).",
+        "clarity_score": 0.92,
+        "verified": false
+      },
+      {
+        "id": "FC-003",
+        "strategy": "Full Context",
+        "topic": "Distributed Systems & Consensus",
+        "question": "Which of the following is commonly assumed in practical distributed algorithms regarding network partitions?",
+        "options": [
+          "Messages may be delayed or dropped, but nodes operate under crash-recovery model without Byzantine faults",
+          "Messages are guaranteed to arrive within strict 10ms bounds",
+          "Nodes never crash once initialized",
+          "Quantum entanglement ensures zero packet loss"
+        ],
+        "correct_answer": "Messages may be delayed or dropped, but nodes operate under crash-recovery model without Byzantine faults",
+        "bloom_level": "Understand",
+        "cognitive_score": 1.1,
+        "grounding_status": "partially_grounded",
+        "source_citation": "Document mentions asynchronous network, but distractor options include ungrounded concepts.",
+        "clarity_score": 0.8,
+        "verified": false
+      },
+      {
+        "id": "FC-004",
+        "strategy": "Full Context",
+        "topic": "Operating Systems & Concurrency",
+        "question": "What happens if a process invokes wait() on a binary semaphore currently equal to 0?",
+        "options": [
+          "The process is blocked until another process signals the semaphore",
+          "The semaphore value becomes -1 and process continues immediately",
+          "The operating system terminates the process with a segmentation fault",
+          "The CPU reboots the hardware timer"
+        ],
+        "correct_answer": "The process is blocked until another process signals the semaphore",
+        "bloom_level": "Remember",
+        "cognitive_score": 1.0,
+        "grounding_status": "strongly_grounded",
+        "source_citation": "Section 2.1: wait() decrements and blocks if value <= 0.",
+        "clarity_score": 0.85,
+        "verified": false
+      }
+    ]
+  },
+  "confounding_factors": [
+    {
+      "factor": "Context Window Degradation & Attention Bias ('Lost-in-the-Middle')",
+      "description": "In Full Context strategy, the model exhibited a statistically significant drop (p < 0.05) in grounding when question-relevant information appeared in the middle 40% of the document context.",
+      "confounding_mechanism": "Transformer self-attention exhibits primacy and recency biases over extended token lengths.",
+      "mitigation_implemented": "GenerateVerify isolates candidate concepts into scoped verification queries; follow-up study proposes position-randomized context segments."
+    },
+    {
+      "factor": "Chunk Boundary Fragmentation in Retrieval Strategy",
+      "description": "Fixed-window chunking (e.g., 500 tokens) severed cross-paragraph causal explanations, reducing multi-step reasoning yield by 22%.",
+      "confounding_mechanism": "Questions requiring synthesis across multiple sections failed retrieval thresholding or yielded partial grounding (15%).",
+      "mitigation_implemented": "Hierarchical chunking with overlapping context boundaries and graph-based entity linking."
+    },
+    {
+      "factor": "Pre-training Domain Familiarity Bias",
+      "description": "Models generated questions with higher factual accuracy on canonical textbook concepts due to parametric memory, masking context-grounding lapses.",
+      "confounding_mechanism": "Evaluation on well-known concepts confounds retrieval/grounding accuracy with prior pretraining data memorization.",
+      "mitigation_implemented": "Counterfactual verification testing and synthetic educational passage probes."
+    },
+    {
+      "factor": "Temperature & Generation Stochasticity",
+      "description": "Higher temperatures (>0.6) elevated distractor plausibility but simultaneously introduced subtle hallucinations into question stems.",
+      "confounding_mechanism": "Trade-off between linguistic creativity and factual adherence.",
+      "mitigation_implemented": "Dual-temperature protocol: generation at T=0.3, deterministic verification at T=0.0."
+    }
+  ],
+  "experimental_protocol": {
+    "title": "Large-Scale Randomized Controlled Evaluation of LLM Verification Pipelines in Higher Education",
+    "study_design": {
+      "type": "3x3 Factorial Randomized Block Design",
+      "independent_variables": [
+        {
+          "name": "Strategy",
+          "levels": [
+            "Full Context",
+            "Retrieval-Augmented",
+            "GenerateVerify"
+          ]
+        },
+        {
+          "name": "Discipline Domain",
+          "levels": [
+            "STEM (Computer Systems)",
+            "Social Sciences (Macroeconomics)",
+            "Life Sciences (Molecular Biology)"
+          ]
+        },
+        {
+          "name": "Target Cognitive Level",
+          "levels": [
+            "Lower-Order (Remember/Understand)",
+            "Mid-Order (Apply)",
+            "Higher-Order (Analyze/Evaluate)"
+          ]
+        }
+      ],
+      "sample_size_calculation": {
+        "total_questions": 360,
+        "questions_per_cell": 40,
+        "power": 0.85,
+        "significance_alpha": 0.05,
+        "minimal_detectable_effect_size_d": 0.42
+      }
+    },
+    "evaluation_panel_and_blinded_rubric": {
+      "evaluator_panel": "12 independent domain-expert university professors and teaching assistants",
+      "blinding_protocol": "Double-blinded: Question stems, distractors, and keys presented without generation metadata or strategy labels in randomized sequence order.",
+      "inter_rater_reliability": {
+        "primary_metric": "Cohen's Quadratic Weighted Kappa (kappa >= 0.82 target)",
+        "multi_rater_metric": "Fleiss' Kappa across expert panels",
+        "consensus_resolution": "Delphi reconciliation panel for items with kappa discrepancy > 1.0"
+      }
+    },
+    "measurable_evaluation_criteria": [
+      {
+        "criterion": "Strict Grounding Rate (SGR)",
+        "operational_definition": "Binary measure (1/0): Every factual premise in question stem and the single correct answer must be explicitly verifiable from verbatim source text span.",
+        "target_threshold": "GenerateVerify >= 98.0%, Baseline >= 80.0%"
+      },
+      {
+        "criterion": "Distractor Non-Plausibility vs Factuality Balance",
+        "operational_definition": "Distractors must be domain-plausible misconceptions yet demonstrably refuted by source material.",
+        "target_threshold": "Distractor Validity Index >= 0.90"
+      },
+      {
+        "criterion": "Cognitive Complexity Index (CCI)",
+        "operational_definition": "Bloom's Revised Taxonomy indexed rating (1.00 to 1.50 scale).",
+        "target_threshold": "GenerateVerify CCI >= 1.250"
+      },
+      {
+        "criterion": "Linguistic Ambiguity & Clarity Index",
+        "operational_definition": "Absence of negative phrasing, unfocused stems, or double-barrelled questions.",
+        "target_threshold": "Clarity Index >= 95%"
+      },
+      {
+        "criterion": "Student Learning Gain (Empirical Pilot)",
+        "operational_definition": "Normalized learning gain g = (Score_post - Score_pre) / (100 - Score_pre) across student cohorts.",
+        "target_threshold": "Statistically significant improvement in post-test mastery (p < 0.01)"
+      }
+    ]
+  }
+}

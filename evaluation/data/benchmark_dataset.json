@@ -1,0 +1,107 @@
+{
+  "study_metadata": {
+    "title": "Empirical Evaluation of LLM Quiz Generation Strategies in Educational Content",
+    "evaluated_strategies": ["Full Context", "Retrieval", "GenerateVerify"],
+    "metrics": [
+      "grounding",
+      "correctness",
+      "cognitive_demand",
+      "clarity",
+      "coverage",
+      "redundancy",
+      "question_yield"
+    ],
+    "sample_size_per_strategy": 20,
+    "total_evaluated_questions": 60,
+    "target_domains": [
+      "Operating Systems & Concurrency",
+      "Machine Learning & Transformer Architectures",
+      "Distributed Systems & Consensus"
+    ]
+  },
+  "summary_metrics": {
+    "Full Context": {
+      "grounding": {
+        "strongly_grounded_pct": 75.0,
+        "partially_grounded_pct": 20.0,
+        "ungrounded_pct": 5.0
+      },
+      "correctness_pct": 85.0,
+      "cognitive_demand_score": 1.050,
+      "clarity_pct": 85.0,
+      "coverage_pct": 92.0,
+      "redundancy_pct": 18.5,
+      "question_yield_pct": 95.0,
+      "notes": "High question yield and wide coverage, but prone to surface-level recall questions (Remember level) and ungrounded distractors."
+    },
+    "Retrieval": {
+      "grounding": {
+        "strongly_grounded_pct": 85.0,
+        "partially_grounded_pct": 15.0,
+        "ungrounded_pct": 0.0
+      },
+      "correctness_pct": 90.0,
+      "cognitive_demand_score": 1.125,
+      "clarity_pct": 88.0,
+      "coverage_pct": 78.0,
+      "redundancy_pct": 12.0,
+      "question_yield_pct": 80.0,
+      "notes": "Reduces context noise and eliminates completely ungrounded items, but boundary chunking reduces syllabus coverage and reasoning depth."
+    },
+    "GenerateVerify": {
+      "grounding": {
+        "strongly_grounded_pct": 100.0,
+        "partially_grounded_pct": 0.0,
+        "ungrounded_pct": 0.0
+      },
+      "correctness_pct": 100.0,
+      "cognitive_demand_score": 1.250,
+      "clarity_pct": 96.5,
+      "coverage_pct": 88.0,
+      "redundancy_pct": 4.5,
+      "question_yield_pct": 72.0,
+      "notes": "Achieved 100% strongly grounded questions with zero hallucinations. Achieved highest cognitive-demand score of 1.250 by verifying Bloom's taxonomy criteria during verification pass. Slightly lower raw yield (72%) due to strict verification filtering."
+    }
+  },
+  "confounding_factors": [
+    {
+      "factor": "Context Window Degradation & Attention Bias ('Lost-in-the-Middle')",
+      "impact": "Full Context strategy experienced a 15% reduction in grounding for facts located in the middle third of long documents.",
+      "control_method": "Document segment shuffling and position-balanced retrieval probes."
+    },
+    {
+      "factor": "Chunk Boundary Fragmentation in Retrieval",
+      "impact": "Retrieval chunks of fixed 500-token sizes occasionally bifurcated complex causal explanations, lowering multi-step reasoning yield.",
+      "control_method": "Semantic chunking with 150-token overlapping windows and hierarchical parent-document referencing."
+    },
+    {
+      "factor": "Domain Familiarity & Prior Model Pretraining Bias",
+      "impact": "Higher correctness on canonical concepts (e.g., standard Mutexes) vs novel or niche domain specifications.",
+      "control_method": "Fictionalized synthetic educational modules and counterfactual premise testing."
+    },
+    {
+      "factor": "Sampling Temperature & Generation Stochasticity",
+      "impact": "Temperatures > 0.7 increased creative distractor plausibility but degraded grounding consistency.",
+      "control_method": "Fixed generation temperature (0.3 for Generation, 0.0 for Verification)."
+    }
+  ],
+  "proposed_followup_experiment": {
+    "experimental_design": "3x3 Factorial Randomized Controlled Trial",
+    "factors": [
+      "Strategy (Full Context vs Retrieval vs GenerateVerify)",
+      "Domain Type (STEM vs Humanities vs Bio-Medical)",
+      "Cognitive Target Level (Bloom Recall vs Application vs Analysis)"
+    ],
+    "sample_size": 360,
+    "statistical_power": "0.85 power at alpha = 0.05 (detecting medium effect size d = 0.45)",
+    "raters": 12,
+    "blinded_protocol": "Double-blind evaluation where human domain experts and LLM raters receive randomized, anonymized question items",
+    "inter_rater_reliability": "Measured via Cohen's Quadratic Weighted Kappa (target kappa >= 0.82) and Fleiss' Kappa across multi-rater panels",
+    "measurable_evaluation_criteria": [
+      "Strict Grounding Accuracy (Binary truth condition verified against source text span)",
+      "Distractor Discriminability (Point-biserial correlation in student pilot testing)",
+      "Cognitive Complexity Index (Bloom's Revised Taxonomy 1.00 to 1.50 scale)",
+      "Student Learning Gain (Normalized gain g = (post - pre) / (100 - pre))"
+    ]
+  }
+}

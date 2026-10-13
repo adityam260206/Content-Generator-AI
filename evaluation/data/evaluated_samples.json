@@ -1,0 +1,232 @@
+{
+  "samples": [
+    {
+      "id": "GV-001",
+      "strategy": "GenerateVerify",
+      "topic": "Operating Systems & Concurrency",
+      "question": "In a system with 4 identical resources, processes declare a maximum need of 2 resources each. What is the maximum number of concurrent processes that can run without risking deadlock?",
+      "options": [
+        "2 processes",
+        "3 processes",
+        "4 processes",
+        "5 processes"
+      ],
+      "correct_answer": "3 processes",
+      "bloom_level": "Analyze",
+      "cognitive_score": 1.30,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Section 4.2: Resource allocation state condition: if sum(Max_i) < Total_Resources + N, no deadlock can occur.",
+      "clarity_score": 0.98,
+      "verified": true
+    },
+    {
+      "id": "GV-002",
+      "strategy": "GenerateVerify",
+      "topic": "Machine Learning & Attention",
+      "question": "Given a query tensor Q with dimensions (B, H, S, D) and key tensor K with dimensions (B, H, S, D), why is the dot-product divided by sqrt(D) before softmax?",
+      "options": [
+        "To prevent softmax gradients from vanishing due to extremely large magnitude logits",
+        "To ensure the resulting attention weights sum up to 1 across the sequence length",
+        "To reduce computational complexity of the subsequent matrix multiplication with V",
+        "To enforce sparsity across attention heads during multi-head projection"
+      ],
+      "correct_answer": "To prevent softmax gradients from vanishing due to extremely large magnitude logits",
+      "bloom_level": "Understand/Apply",
+      "cognitive_score": 1.20,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Section 3.1: For large values of d_k, the dot products grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients.",
+      "clarity_score": 0.96,
+      "verified": true
+    },
+    {
+      "id": "GV-003",
+      "strategy": "GenerateVerify",
+      "topic": "Distributed Systems & Consensus",
+      "question": "In the Raft consensus protocol, what safety invariant guarantees that if a log entry is committed at a given index and term, it will be present in the logs of all leaders in future terms?",
+      "options": [
+        "Leader Completeness Property",
+        "Log Matching Property",
+        "State Machine Safety Property",
+        "Election Safety Property"
+      ],
+      "correct_answer": "Leader Completeness Property",
+      "bloom_level": "Analyze",
+      "cognitive_score": 1.30,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Section 5.4.1: Raft guarantees that if a log entry is committed in a given term, then that entry will be present in the logs of the leaders for all higher-numbered terms (Leader Completeness).",
+      "clarity_score": 0.95,
+      "verified": true
+    },
+    {
+      "id": "GV-004",
+      "strategy": "GenerateVerify",
+      "topic": "Operating Systems & Concurrency",
+      "question": "Consider Peterson's Algorithm for mutual exclusion between two threads. If the atomic turn variable assignment is removed while keeping the flag array checks, which condition is violated?",
+      "options": [
+        "Mutual Exclusion (both threads can enter critical section simultaneously)",
+        "Progress / Deadlock Freedom",
+        "Bounded Waiting",
+        "Fault Tolerance"
+      ],
+      "correct_answer": "Progress / Deadlock Freedom",
+      "bloom_level": "Analyze/Evaluate",
+      "cognitive_score": 1.25,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Section 2.3: Without the turn resolution variable, if both threads set their flags concurrently, each thread will loop indefinitely waiting for the other, causing a deadlock.",
+      "clarity_score": 0.97,
+      "verified": true
+    },
+    {
+      "id": "GV-005",
+      "strategy": "GenerateVerify",
+      "topic": "Machine Learning & Attention",
+      "question": "A model uses causal (autoregressive) self-attention mask M where M_ij = -inf for j > i. How does this masking enforce the autoregressive property during training?",
+      "options": [
+        "By setting softmax output probabilities for future tokens to exactly 0, preventing information leakage",
+        "By zeroing out the weights in the query projection matrix for subsequent sequence steps",
+        "By enforcing that the gradient backpropagation stops before the query layer",
+        "By shuffling the token sequence order prior to positional encoding addition"
+      ],
+      "correct_answer": "By setting softmax output probabilities for future tokens to exactly 0, preventing information leakage",
+      "bloom_level": "Apply",
+      "cognitive_score": 1.20,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Section 3.2.3: We implement this inside of scaled dot-product attention by masking out (setting to -infinity) all values in the input of the softmax which correspond to illegal connections.",
+      "clarity_score": 0.96,
+      "verified": true
+    },
+    {
+      "id": "RET-001",
+      "strategy": "Retrieval",
+      "topic": "Operating Systems & Concurrency",
+      "question": "Which of the following is NOT one of the Coffman conditions required for deadlock to occur?",
+      "options": [
+        "Mutual Exclusion",
+        "Hold and Wait",
+        "Preemptive Scheduling",
+        "Circular Wait"
+      ],
+      "correct_answer": "Preemptive Scheduling",
+      "bloom_level": "Remember/Understand",
+      "cognitive_score": 1.10,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Retrieved chunk 2: Coffman conditions are mutual exclusion, hold and wait, no preemption, and circular wait.",
+      "clarity_score": 0.90,
+      "verified": false
+    },
+    {
+      "id": "RET-002",
+      "strategy": "Retrieval",
+      "topic": "Machine Learning & Attention",
+      "question": "What is the primary role of the Key vector K in scaled dot-product attention?",
+      "options": [
+        "To be matched against the Query vector to compute attention relevance weights",
+        "To represent the final output representation transferred to the feed-forward network",
+        "To act as the learned positional bias added to token embeddings",
+        "To normalize the variance across embedding dimensions"
+      ],
+      "correct_answer": "To be matched against the Query vector to compute attention relevance weights",
+      "bloom_level": "Understand",
+      "cognitive_score": 1.10,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Retrieved chunk 5: Keys are compared with queries to yield compatibility coefficients.",
+      "clarity_score": 0.88,
+      "verified": false
+    },
+    {
+      "id": "RET-003",
+      "strategy": "Retrieval",
+      "topic": "Distributed Systems & Consensus",
+      "question": "In Raft, what initiates a new election when a follower node misses heartbeat messages?",
+      "options": [
+        "The follower's election timer expires",
+        "The client sends an election probe command",
+        "The previous leader explicitly transfers leadership",
+        "The majority of nodes send negative acknowledgments"
+      ],
+      "correct_answer": "The follower's election timer expires",
+      "bloom_level": "Remember",
+      "cognitive_score": 1.00,
+      "grounding_status": "partially_grounded",
+      "source_citation": "Retrieved chunk 1: Mentions heartbeats and election timers, but lacks exact threshold details.",
+      "clarity_score": 0.85,
+      "verified": false
+    },
+    {
+      "id": "FC-001",
+      "strategy": "Full Context",
+      "topic": "Operating Systems & Concurrency",
+      "question": "What does a counting semaphore initialize to when used to manage a resource pool of size N?",
+      "options": [
+        "N",
+        "0",
+        "1",
+        "-1"
+      ],
+      "correct_answer": "N",
+      "bloom_level": "Remember",
+      "cognitive_score": 1.00,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Document text: A counting semaphore is initialized to the number of resources available.",
+      "clarity_score": 0.88,
+      "verified": false
+    },
+    {
+      "id": "FC-002",
+      "strategy": "Full Context",
+      "topic": "Machine Learning & Attention",
+      "question": "Who introduced the Transformer architecture in the paper 'Attention Is All You Need'?",
+      "options": [
+        "Vaswani et al. in 2017",
+        "LeCun et al. in 2015",
+        "Goodfellow et al. in 2014",
+        "Hinton et al. in 2012"
+      ],
+      "correct_answer": "Vaswani et al. in 2017",
+      "bloom_level": "Remember",
+      "cognitive_score": 1.00,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Header: Attention Is All You Need, Vaswani et al. (2017).",
+      "clarity_score": 0.92,
+      "verified": false
+    },
+    {
+      "id": "FC-003",
+      "strategy": "Full Context",
+      "topic": "Distributed Systems & Consensus",
+      "question": "Which of the following is commonly assumed in practical distributed algorithms regarding network partitions?",
+      "options": [
+        "Messages may be delayed or dropped, but nodes operate under crash-recovery model without Byzantine faults",
+        "Messages are guaranteed to arrive within strict 10ms bounds",
+        "Nodes never crash once initialized",
+        "Quantum entanglement ensures zero packet loss"
+      ],
+      "correct_answer": "Messages may be delayed or dropped, but nodes operate under crash-recovery model without Byzantine faults",
+      "bloom_level": "Understand",
+      "cognitive_score": 1.10,
+      "grounding_status": "partially_grounded",
+      "source_citation": "Document mentions asynchronous network, but distractor options include ungrounded concepts.",
+      "clarity_score": 0.80,
+      "verified": false
+    },
+    {
+      "id": "FC-004",
+      "strategy": "Full Context",
+      "topic": "Operating Systems & Concurrency",
+      "question": "What happens if a process invokes wait() on a binary semaphore currently equal to 0?",
+      "options": [
+        "The process is blocked until another process signals the semaphore",
+        "The semaphore value becomes -1 and process continues immediately",
+        "The operating system terminates the process with a segmentation fault",
+        "The CPU reboots the hardware timer"
+      ],
+      "correct_answer": "The process is blocked until another process signals the semaphore",
+      "bloom_level": "Remember",
+      "cognitive_score": 1.00,
+      "grounding_status": "strongly_grounded",
+      "source_citation": "Section 2.1: wait() decrements and blocks if value <= 0.",
+      "clarity_score": 0.85,
+      "verified": false
+    }
+  ]
+}
