@@ -85,7 +85,11 @@ export default function Home() {
         body: JSON.stringify({ prompt: generalPrompt, contentType, tone }),
       });
 
-      if (!response.ok) throw new Error('Failed to generate content');
+      if (!response.ok) {
+        const errText = await response.text();
+        setGeneralContent(`⚠️ ${errText || 'Failed to generate content. Please try again.'}`);
+        return;
+      }
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       if (reader) {
@@ -95,9 +99,9 @@ export default function Home() {
           setGeneralContent((prev) => prev + decoder.decode(value));
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setGeneralContent('Error generating content. Please check your API key or network.');
+      setGeneralContent(`⚠️ Error generating content: ${err?.message || 'Network error'}`);
     } finally {
       setIsGeneratingGeneral(false);
     }

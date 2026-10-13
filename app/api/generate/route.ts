@@ -11,35 +11,56 @@ export async function POST(req: NextRequest) {
     }
 
     const groqApiKey = process.env.GROQ_API_KEY;
-    const model = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b';
+    if (!groqApiKey) {
+      return new Response('GROQ_API_KEY environment variable is not set.', { status: 500 });
+    }
+    const modelsToTry = [process.env.GROQ_MODEL || 'qwen/qwen3.8-27b', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
 
     // Build the system prompt based on content type and tone
     const systemPrompt = buildSystemPrompt(contentType, tone);
 
-    // Call Groq API with streaming
-    const groqResponse = await fetch(GROQ_API_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${groqApiKey}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'content-gen/1.0',
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt },
-        ],
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 2500,
-      }),
-    });
+    let groqResponse: Response | null = null;
+    let lastError = '';
 
-    if (!groqResponse.ok) {
-      const err = await groqResponse.text();
-      console.error('Groq API error:', err);
-      return new Response(`Groq error: ${err}`, { status: groqResponse.status });
+    for (const model of modelsToTry) {
+      try {
+        const res = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${groqApiKey}`,
+            'Content-Type': 'application/json',
+            'User-Agent': 'content-gen/1.0',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: prompt },
+            ],
+            stream: true,
+            temperature: 0.7,
+            max_tokens: 600, // kept <= 800 to stay safely under Groq's 1000 OTPM limit
+          }),
+        });
+
+        if (res.ok) {
+          groqResponse = res;
+          break;
+        } else {
+          lastError = await res.text();
+          console.warn(`Groq model ${model} failed (${res.status}): ${lastError}. Trying fallback model...`);
+        }
+      } catch (err: any) {
+        lastError = err.message;
+      }
+    }
+
+    if (!groqResponse || !groqResponse.ok) {
+      console.error('All Groq models failed. Last error:', lastError);
+      return new Response(
+        `AI service rate limit or temporary constraint. Please try again shortly. (${lastError.slice(0, 150)})`,
+        { status: 503 }
+      );
     }
 
     // Stream Groq response chunks to client
@@ -74,7 +95,7 @@ export async function POST(req: NextRequest) {
                     controller.enqueue(encoder.encode(delta));
                   }
                 } catch {
-                  // ignore keepalive or malformed chunk
+                  // ignore malformed chunk
                 }
               }
             }
@@ -92,9 +113,9 @@ export async function POST(req: NextRequest) {
         'Transfer-Encoding': 'chunked',
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating content:', error);
-    return new Response('Error generating content', { status: 500 });
+    return new Response(`Error generating content: ${error.message}`, { status: 500 });
   }
 }
 
