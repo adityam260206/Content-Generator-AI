@@ -1,8 +1,6 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest } from 'next/server';
 
-// Initialize the Gemini client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,29 +10,74 @@ export async function POST(req: NextRequest) {
       return new Response('Prompt is required', { status: 400 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      return new Response('API key not configured', { status: 500 });
-    }
+    const groqApiKey = process.env.GROQ_API_KEY;
+    const model = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b';
 
     // Build the system prompt based on content type and tone
     const systemPrompt = buildSystemPrompt(contentType, tone);
 
-    // Combine system prompt with user prompt
-    const fullPrompt = `${systemPrompt}\n\nUser Request: ${prompt}`;
+    // Call Groq API with streaming
+    const groqResponse = await fetch(GROQ_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'content-gen/1.0',
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt },
+        ],
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 2500,
+      }),
+    });
 
-    // Get the generative model
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    if (!groqResponse.ok) {
+      const err = await groqResponse.text();
+      console.error('Groq API error:', err);
+      return new Response(`Groq error: ${err}`, { status: groqResponse.status });
+    }
 
-    // Generate content with streaming
-    const result = await model.generateContentStream(fullPrompt);
+    // Stream Groq response chunks to client
+    const reader = groqResponse.body?.getReader();
+    if (!reader) {
+      return new Response('Failed to read streaming body', { status: 500 });
+    }
 
-    // Create a ReadableStream to pipe the response
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
     const readableStream = new ReadableStream({
       async start(controller) {
+        let buffer = '';
         try {
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
-            controller.enqueue(new TextEncoder().encode(text));
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed || trimmed === 'data: [DONE]') continue;
+              if (trimmed.startsWith('data: ')) {
+                try {
+                  const json = JSON.parse(trimmed.slice(6));
+                  const delta = json.choices?.[0]?.delta?.content || '';
+                  if (delta) {
+                    controller.enqueue(encoder.encode(delta));
+                  }
+                } catch {
+                  // ignore keepalive or malformed chunk
+                }
+              }
+            }
           }
           controller.close();
         } catch (error) {

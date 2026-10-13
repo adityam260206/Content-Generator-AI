@@ -212,14 +212,12 @@ export async function POST(req: NextRequest) {
       targetBloomLevel = "Analyze"
     } = body;
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const groqApiKey = process.env.GROQ_API_KEY;
+    const groqModel = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b';
 
-    // If custom context and Gemini API key is configured, invoke Gemini with verification pass
-    if (apiKey && contextText && contextText.trim().length > 50) {
+    // If custom context is provided, invoke Groq with two-pass verification prompt
+    if (contextText && contextText.trim().length > 30) {
       try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
         const prompt = `You are an expert AI Educational Content Evaluation and Quiz Generation engine.
 Generate ${numQuestions} rigorous multiple-choice questions based strictly on the source context below.
 Strategy: ${strategy}
@@ -248,30 +246,49 @@ Return valid JSON in this exact structure:
   }
 ]`;
 
-        const result = await model.generateContent({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { responseMimeType: "application/json" }
+        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${groqApiKey}`,
+            "Content-Type": "application/json",
+            "User-Agent": "content-gen/1.0",
+          },
+          body: JSON.stringify({
+            model: groqModel,
+            messages: [
+              { role: "system", content: "You are an educational quiz generation engine. Output only valid JSON." },
+              { role: "user", content: prompt },
+            ],
+            temperature: 0.3,
+            max_tokens: 2500,
+          }),
         });
 
-        const textResponse = result.response.text();
-        const parsed = JSON.parse(textResponse);
+        if (groqRes.ok) {
+          const data: any = await groqRes.json();
+          const rawText = data.choices?.[0]?.message?.content || "";
+          const cleanedText = rawText.replace(/```(?:json)?/g, "").replace(/```/g, "").trim();
+          const parsed = JSON.parse(cleanedText);
 
-        const verifiedQuestions = parsed.map((item: any, idx: number) => ({
-          ...item,
-          id: `custom-${idx + 1}`,
-          strategy,
-          verified: strategy === "GenerateVerify",
-          cognitive_score: strategy === "GenerateVerify" ? 1.25 : 1.05
-        }));
+          const verifiedQuestions = (Array.isArray(parsed) ? parsed : Object.values(parsed).find(Array.isArray) || []).map((item: any, idx: number) => ({
+            ...item,
+            id: `custom-${idx + 1}`,
+            strategy,
+            verified: strategy === "GenerateVerify",
+            cognitive_score: strategy === "GenerateVerify" ? 1.25 : 1.05,
+          }));
 
-        return NextResponse.json({
-          success: true,
-          strategy,
-          topic: "Custom Source Text",
-          questions: verifiedQuestions,
-        });
-      } catch (geminiErr) {
-        console.warn("Gemini live generation failed, falling back to verified educational dataset:", geminiErr);
+          if (verifiedQuestions.length > 0) {
+            return NextResponse.json({
+              success: true,
+              strategy,
+              topic: "Custom Source Text",
+              questions: verifiedQuestions,
+            });
+          }
+        }
+      } catch (groqErr) {
+        console.warn("Groq live generation fallback to verified educational dataset:", groqErr);
       }
     }
 
